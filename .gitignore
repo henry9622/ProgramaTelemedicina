@@ -1,0 +1,52 @@
+# ==========================================
+# TELEMEDICINA CLÍNICA - GITIGNORE
+# ==========================================
+
+# === ARCHIVOS DE ENTORNO Y SECRETOS ===
+.env
+*.env.local
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# === BASE DE DATOS ===
+*.db
+*.sqlite3
+
+# === RESPALDOS (grandes, se manejan por separado) ===
+backups/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === SISTEMA ===
+.DS_Store
+Thumbs.db
+
+# === LOGS ===
+*.log
+logs/
+
+# === TEMPORALES ===
+*.tmp
+*.temp
+check.py
+verificar_migracion.py
+verificacion_resultado.txt
+verificar_bd.py
+
+# === DOCUMENTOS CONFIDENCIALES (NUNCA SUBIR) ===
+docs/RESPALDO_CLAVES_CONFIDENCIAL.txt
+*CLAVES*.txt
+*SECRETO*.txt
+*CONFIDENCIAL*.txt

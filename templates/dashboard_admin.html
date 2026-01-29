@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Clínica Digital</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .logout:hover {
+            background: #ff4757;
+            color: white;
+        }
+
+        .container {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Pestañas */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95em;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-header h2 {
+            color: #1a1a2e;
+            font-size: 1.3em;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .role-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background: #ffe0e0;
+            color: #dc3545;
+        }
+
+        .role-medico {
+            background: #e0e7ff;
+            color: #667eea;
+        }
+
+        .role-tens {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .col-check {
+            display: none;
+            text-align: center;
+            width: 50px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .form-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .form-section h3 {
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Código de consulta estilo */
+        .codigo-badge {
+            font-family: 'Consolas', monospace;
+            background: #1a1a2e;
+            color: #ffd93d;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .token-badge {
+            font-family: 'Consolas', monospace;
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+
+        .empty-state .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        /* Flash messages */
+        .flash-message {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .flash-message.error {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+        }
+
+        /* ==========================================
+           ESTILOS RESPONSIVOS
+           ========================================== */
+
+        /* Tablets y pantallas medianas */
+        @media (max-width: 992px) {
+            .container {
+                padding: 20px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: 100%;
+            }
+        }
+
+        /* Móviles */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .tab-content {
+                padding: 20px 15px;
+            }
+
+            /* Tablas responsivas - scroll horizontal */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+                font-size: 0.85em;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .codigo-badge,
+            .token-badge {
+                font-size: 0.75em;
+                padding: 3px 6px;
+            }
+        }
+
+        /* Móviles pequeños */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1em;
+            }
+
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 0.85em;
+            }
+
+            .badge {
+                font-size: 0.75em;
+                padding: 4px 10px;
+            }
+
+            .form-section h3 {
+                font-size: 1em;
+            }
+
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.85em;
+            }
+        }
+
+        /* Modal de confirmación */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-body p {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Validación de RUT */
+        .error-rut {
+            color: #ff4757;
+            font-size: 0.75em;
+            margin-top: 4px;
+            display: none;
+            font-weight: 600;
+        }
+
+        input.invalid {
+            border-color: #ff4757 !important;
+            background-color: #fff5f5;
+        }
+
+        input.valid {
+            border-color: #28a745 !important;
+            background-color: #f8fff9;
+        }
+    </style>
+    <!-- CSRF Token para protección de formularios -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+
+<body>
+    <script>
+        // Inyectar CSRF token en todos los formularios automáticamente
+        document.addEventListener('DOMContentLoaded', function () {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            document.querySelectorAll('form[method="post"]').forEach(function (form) {
+                if (!form.querySelector('input[name="csrf_token"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = csrfToken;
+                    form.insertBefore(input, form.firstChild);
+                }
+            });
+
+            // ==========================================
+            // VALIDACIÓN DE RUT PERSONAL
+            // ==========================================
+            const rutInput = document.getElementById('rut_personal');
+            const errorMsg = document.getElementById('error-rut-personal');
+            const formRegistro = rutInput?.closest('form');
+
+            function validarRUT(rut) {
+                if (!rut || rut.length < 2) return false;
+                let tmp = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                let num = tmp.slice(0, -1);
+                let dv = tmp.slice(-1);
+
+                if (!/^[0-9]+$/.test(num)) return false;
+
+                let s = 0, m = 2;
+                for (let i = num.length - 1; i >= 0; i--) {
+                    s += parseInt(num.charAt(i)) * m;
+                    m = m < 7 ? m + 1 : 2;
+                }
+                let res = 11 - (s % 11);
+                let dvCalc = res === 11 ? "0" : res === 10 ? "K" : res.toString();
+                return dvCalc === dv;
+            }
+
+            if (rutInput) {
+                rutInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+
+                    // Solo permitir números y K
+                    value = value.replace(/[^0-9K]/g, '');
+
+                    if (value.length > 1) {
+                        let formatted = value.slice(0, -1) + '-' + value.slice(-1);
+                        e.target.value = formatted;
+                    } else {
+                        e.target.value = value;
+                    }
+
+                    if (value.length >= 8) {
+                        const esValido = validarRUT(value);
+                        if (esValido) {
+                            rutInput.classList.remove('invalid');
+                            rutInput.classList.add('valid');
+                            errorMsg.style.display = 'none';
+                        } else {
+                            rutInput.classList.add('invalid');
+                            rutInput.classList.remove('valid');
+                            errorMsg.style.display = 'block';
+                        }
+                    } else {
+                        rutInput.classList.remove('invalid');
+                        rutInput.classList.remove('valid');
+                        errorMsg.style.display = 'none';
+                    }
+                });
+            }
+
+            if (formRegistro) {
+                formRegistro.addEventListener('submit', function (e) {
+                    if (rutInput) {
+                        let value = rutInput.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                        if (!validarRUT(value)) {
+                            e.preventDefault();
+                            rutInput.classList.add('invalid');
+                            errorMsg.style.display = 'block';
+                            rutInput.focus();
+
+                            // Animación de shake para indicar error
+                            rutInput.style.animation = 'shake 0.5s';
+                            setTimeout(() => rutInput.style.animation = '', 500);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+    <div class="header">
+        <h1>
+            {% if es_admin_maestro %}
+            <span class="corona-icon">admin_maestro</span> Panel Admin Maestro
+            {% else %}
+            Panel de Administracion
+            {% endif %}
+        </h1>
+        <a href="/logout" class="logout">Cerrar Sesion</a>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="tabs">
+            {% if es_admin_maestro and total_pendientes > 0 %}
+            <button class="tab-btn" id="btn-tab-aprobaciones" onclick="openTab(event, 'tab-aprobaciones')"
+                style="position: relative;">
+                Aprobaciones
+                <span
+                    style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.75em; display: flex; align-items: center; justify-content: center;">{{
+                    total_pendientes }}</span>
+            </button>
+            {% elif es_admin_maestro %}
+            <button class="tab-btn" id="btn-tab-aprobaciones"
+                onclick="openTab(event, 'tab-aprobaciones')">Aprobaciones</button>
+            {% endif %}
+            <button class="tab-btn" id="btn-tab-usuarios" onclick="openTab(event, 'tab-usuarios')">Personal</button>
+            <button class="tab-btn" id="btn-tab-lugares" onclick="openTab(event, 'tab-lugares')">Postas</button>
+            <button class="tab-btn" id="btn-tab-historial" onclick="openTab(event, 'tab-historial')">Historial</button>
+            <button class="tab-btn" id="btn-tab-respaldos" onclick="openTab(event, 'tab-respaldos')">Respaldos</button>
+            {% if not es_admin_maestro and mis_solicitudes|length > 0 %}
+            <button class="tab-btn" id="btn-tab-mis-solicitudes" onclick="openTab(event, 'tab-mis-solicitudes')">Mis
+                Solicitudes</button>
+            {% endif %}
+        </div>
+
+        <!-- TAB: APROBACIONES (Solo Admin Maestro) -->
+        {% if es_admin_maestro %}
+        <div id="tab-aprobaciones" class="tab-content">
+            <div class="card-header">
+                <h2>Solicitudes Pendientes</h2>
+                <span class="badge">{{ total_pendientes }} pendientes</span>
+            </div>
+
+            {% if solicitudes_pendientes|length == 0 %}
+            <div class="empty-state">
+                <div class="icon">OK</div>
+                <p>No hay solicitudes pendientes</p>
+                <p style="font-size: 0.9em; color: #aaa;">Las solicitudes de los administradores regulares apareceran
+                    aqui</p>
+            </div>
+            {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Detalle</th>
+                        <th>Solicitante</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in solicitudes_pendientes %}
+                    <tr>
+                        <td>
+                            <span class="role-badge role-admin">{{ s.tipo_accion }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ s.entidad_tipo }}</strong> #{{ s.entidad_id }}
+                            {% if s.datos_originales %}
+                            <br><small style="color: #888;">{{ s.datos_originales }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.solicitante_nombre }}</td>
+                        <td>{{ s.fecha_solicitud }}</td>
+                        <td>
+                            <form action="/admin/aprobar-solicitud/{{ s.id }}" method="post" style="display: inline;">
+                                <input type="hidden" name="motivo" value="Aprobada">
+                                <button type="submit" class="btn btn-primary"
+                                    style="padding: 6px 12px; font-size: 0.85em;">
+                                    Aprobar
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.85em;"
+                                onclick="mostrarModalRechazo({{ s.id }})">
+                                Rechazar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- TAB: MIS SOLICITUDES (Solo Admin Regular) -->
+        {% if not es_admin_maestro and mis_solicitudes|length > 0 %}
+        <div id="tab-mis-solicitudes" class="tab-content">
+            <div class="card-header">
+                <h2>Mis Solicitudes</h2>
+                <span class="badge">{{ mis_solicitudes|length }} solicitudes</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Detalle</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Resolucion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in mis_solicitudes %}
+                    <tr>
+                        <td>{{ s.tipo_accion }}</td>
+                        <td>{{ s.entidad_tipo }} #{{ s.entidad_id }}</td>
+                        <td>
+                            {% if s.estado == 'pendiente' %}
+                            <span class="role-badge" style="background: #ffc107; color: #000;">PENDIENTE</span>
+                            {% elif s.estado == 'aprobada' %}
+                            <span class="role-badge" style="background: #28a745; color: #fff;">APROBADA</span>
+                            {% elif s.estado == 'rechazada' %}
+                            <span class="role-badge" style="background: #dc3545; color: #fff;">RECHAZADA</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.fecha_solicitud }}</td>
+                        <td>
+                            {% if s.motivo_resolucion %}
+                            {{ s.motivo_resolucion }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- TAB: USUARIOS -->
+        <div id="tab-usuarios" class="tab-content">
+            <div class="card-header">
+                <h2>Gestión de Personal</h2>
+                <span class="badge">{{ usuarios|length }} registros</span>
+            </div>
+
+            <form action="/admin/eliminar-usuarios" method="post">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-check col-check-u">Sel.</th>
+                            <th>Nombre</th>
+                            <th>RUT</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td class="col-check col-check-u">
+                                <input type="checkbox" name="usuarios_seleccionados" value="{{ u.id }}">
+                            </td>
+                            <td><strong>{{ u.nombre }}</strong></td>
+                            <td>{{ u.rut }}</td>
+                            <td>{{ u.correo }}</td>
+                            <td>
+                                <span class="role-badge role-{{ u.rol }}">{{ u.rol.upper() }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="actions">
+                    <button type="button" id="toggle-u" class="btn btn-secondary" onclick="toggleMode('u')">🗑️ Modo
+                        Eliminar</button>
+                    <button type="submit" class="btn btn-danger" id="btn-u" style="display:none">Confirmar
+                        Eliminación</button>
+                </div>
+            </form>
+
+            <div class="form-section">
+                <h3>➕ Inscribir Nuevo Personal</h3>
+                <form action="/admin/registrar-usuario" method="post">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre completo</label>
+                            <input type="text" name="nombre" placeholder="Juan Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RUT</label>
+                            <input type="text" name="rut" id="rut_personal" placeholder="12345678-9" required
+                                autocomplete="off">
+                            <div id="error-rut-personal" class="error-rut">❌ RUT inválido</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo</label>
+                            <input type="email" name="correo" placeholder="correo@clinica.cl" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" name="password" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Rol</label>
+                            <select name="rol">
+                                <option value="medico">Médico</option>
+                                <option value="tens">TENS</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: LUGARES -->
+        <div id="tab-lugares" class="tab-content">
+            <div class="card-header">
+                <h2>Gestión de Postas / Centros</h2>
+                <span class="badge">{{ lugares|length }} lugares</span>
+            </div>
+
+            <form action="/admin/eliminar-lugares" method="post">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-check col-check-l">Sel.</th>
+                            <th>Nombre de la Posta</th>
+                            <th>Dirección</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for l in lugares %}
+                        <tr>
+                            <td class="col-check col-check-l">
+                                <input type="checkbox" name="lugares_seleccionados" value="{{ l.id }}">
+                            </td>
+                            <td><strong>📍 {{ l.nombre_posta }}</strong></td>
+                            <td>{{ l.direccion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="actions">
+                    <button type="button" id="toggle-l" class="btn btn-secondary" onclick="toggleMode('l')">🗑️ Modo
+                        Eliminar</button>
+                    <button type="submit" class="btn btn-danger" id="btn-l" style="display:none">Confirmar
+                        Eliminación</button>
+                </div>
+            </form>
+
+            <div class="form-section">
+                <h3>➕ Registrar Nueva Posta</h3>
+                <form action="/admin/registrar-lugar" method="post">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre de la Posta</label>
+                            <input type="text" name="nombre_posta" placeholder="Ej: Posta Rural Norte" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" name="direccion" placeholder="Ej: Av. Principal 123" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Lugar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: HISTORIAL -->
+        <div id="tab-historial" class="tab-content">
+            <div class="card-header">
+                <h2>📋 Historial de Consultas</h2>
+                <span class="badge">{{ historial|length }} registros</span>
+            </div>
+
+            {% if historial|length == 0 %}
+            <div class="empty-state">
+                <div class="icon">📭</div>
+                <p>No hay consultas registradas aún</p>
+                <p style="font-size: 0.9em; color: #aaa;">Los registros aparecerán cuando se finalicen consultas</p>
+            </div>
+            {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Token Seguridad</th>
+                        <th>CIP (Código Atención)</th>
+                        <th>Médico</th>
+                        <th>TENS</th>
+                        <th>Posta</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in historial %}
+                    <tr>
+                        <td><span class="codigo-badge">{{ h.codigo_consulta }}</span></td>
+                        <td><span class="token-badge">{{ h.token_seguridad }}</span></td>
+                        <td><strong>{{ h.cip or '(migración)' }}</strong></td>
+                        <td>👨‍⚕️ {{ h.nombre_medico }}</td>
+                        <td>🏥 {{ h.tens_nombre }}</td>
+                        <td>📍 {{ h.nombre_posta }}</td>
+                        <td>{{ h.fecha_fin }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <!-- TAB: RESPALDOS -->
+        <div id="tab-respaldos" class="tab-content">
+            <div class="card-header">
+                <h2>💾 Gestión de Respaldos</h2>
+                <span class="badge">{{ respaldos|length }} archivos</span>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="form-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                <h3>⚡ Acciones Rápidas</h3>
+                <div class="actions" style="margin-bottom: 20px;">
+                    <form action="/admin/crear-respaldo" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">💾 Crear Respaldo Manual</button>
+                    </form>
+                </div>
+
+                <!-- Exportar historial con filtro de fechas -->
+                <h3 style="margin-top: 25px;">📊 Exportar Historial a CSV</h3>
+                <form action="/admin/exportar-historial" method="get" style="margin-top: 10px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Desde (opcional)</label>
+                            <input type="date" name="fecha_desde" style="padding: 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Hasta (opcional)</label>
+                            <input type="date" name="fecha_hasta" style="padding: 10px;">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button type="submit" class="btn btn-success">📥 Descargar CSV</button>
+                        </div>
+                    </div>
+                    <p style="color: #888; font-size: 0.85em; margin-top: 5px;">
+                        💡 Deja las fechas vacías para exportar todo el historial
+                    </p>
+                </form>
+            </div>
+
+            <div class="form-section">
+                <h3>📁 Respaldos Disponibles</h3>
+                <p style="color: #888; margin-bottom: 15px; font-size: 0.9em;">
+                    ⏰ Respaldo automático diario a las 4:59 PM |
+                    🔒 <strong>Automáticos = Protegidos</strong> (no se pueden eliminar) |
+                    📝 Manuales = Eliminables
+                </p>
+
+                {% if respaldos|length == 0 %}
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>No hay respaldos disponibles</p>
+                    <p style="font-size: 0.9em; color: #aaa;">Crea un respaldo manual usando el botón de arriba</p>
+                </div>
+                {% else %}
+                <form id="form-eliminar-respaldos" action="/admin/eliminar-respaldos" method="post">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-check col-check-r" style="display: none;">Sel.</th>
+                                <th>Tipo</th>
+                                <th>Nombre del Archivo</th>
+                                <th>Tamaño</th>
+                                <th>Fecha de Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in respaldos %}
+                            <tr>
+                                <td class="col-check col-check-r" style="display: none;">
+                                    {% if r.protegido %}
+                                    <span title="Protegido - No se puede eliminar">🔒</span>
+                                    {% else %}
+                                    <input type="checkbox" name="respaldos_seleccionados" value="{{ r.nombre }}">
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.protegido %}
+                                    <span class="role-badge role-medico" style="font-size: 0.75em;">🔒 AUTO</span>
+                                    {% else %}
+                                    <span class="role-badge role-tens" style="font-size: 0.75em;">📝 MANUAL</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="codigo-badge">{{ r.nombre }}</span>
+                                </td>
+                                <td>{{ r.tamaño }}</td>
+                                <td>{{ r.fecha }}</td>
+                                <td>
+                                    <a href="/admin/descargar-respaldo/{{ r.nombre }}" class="btn btn-secondary"
+                                        style="padding: 6px 12px; font-size: 0.85em;">
+                                        ⬇️ Descargar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Input oculto para la contraseña -->
+                    <input type="hidden" name="password_confirmacion" id="password_confirmacion_hidden">
+
+                    <div class="actions" style="margin-top: 15px;">
+                        <button type="button" id="toggle-r" class="btn btn-secondary"
+                            onclick="toggleModeRespaldos()">🗑️ Modo Eliminar (solo manuales)</button>
+                        <button type="button" class="btn btn-danger" id="btn-r" style="display:none"
+                            onclick="mostrarModalConfirmacion()">Confirmar Eliminación</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación para eliminar respaldos -->
+        <div id="modal-confirmar-eliminacion" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🔐 Confirmar Eliminación</h3>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #ff4757; margin-bottom: 15px;">
+                        <strong>⚠️ ¡Atención!</strong> Esta acción eliminará permanentemente los respaldos
+                        seleccionados.
+                    </p>
+                    <p style="margin-bottom: 20px;">Ingrese su contraseña de administrador para confirmar:</p>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="password_modal" placeholder="••••••••" autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">🗑️ Eliminar
+                        Respaldos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Rechazo de Solicitud (Admin Maestro) -->
+        {% if es_admin_maestro %}
+        <div id="modal-rechazo" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Rechazar Solicitud</h3>
+                </div>
+                <form id="form-rechazo" action="" method="post">
+                    <div class="modal-body">
+                        <p style="margin-bottom: 20px;">Indique el motivo del rechazo:</p>
+                        <div class="form-group">
+                            <label>Motivo del Rechazo</label>
+                            <textarea name="motivo" id="motivo_rechazo" rows="3"
+                                placeholder="Escriba el motivo del rechazo..." required
+                                style="width: 100%; padding: 10px; border: 1px solid #444; border-radius: 6px; background: #2a2a3e; color: #fff;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="cerrarModalRechazo()">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Rechazar Solicitud</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const lastTab = localStorage.getItem('activeAdminTab') || 'tab-usuarios';
+            document.getElementById(lastTab).style.display = "block";
+
+            // Activar el botón correcto
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                if (btn.id === 'btn-' + lastTab) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        function openTab(evt, name) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let c of contents) c.style.display = "none";
+
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let b of buttons) b.classList.remove("active");
+
+            document.getElementById(name).style.display = "block";
+            evt.currentTarget.classList.add("active");
+
+            localStorage.setItem('activeAdminTab', name);
+        }
+
+        function toggleMode(type) {
+            let cols = document.querySelectorAll('.col-check-' + type);
+            let btnConfirm = document.getElementById('btn-' + type);
+            let btnToggle = document.getElementById('toggle-' + type);
+
+            let isHidden = cols[0].style.display === "none" || cols[0].style.display === "";
+
+            if (isHidden) {
+                cols.forEach(c => c.style.display = "table-cell");
+                btnConfirm.style.display = "inline-block";
+                btnToggle.textContent = "❌ Cancelar";
+                btnToggle.classList.remove("btn-secondary");
+                btnToggle.classList.add("btn-danger");
+            } else {
+                cols.forEach(c => c.style.display = "none");
+                btnConfirm.style.display = "none";
+                btnToggle.textContent = "🗑️ Modo Eliminar";
+                btnToggle.classList.remove("btn-danger");
+                btnToggle.classList.add("btn-secondary");
+                document.querySelectorAll('.col-check-' + type + ' input').forEach(i => i.checked = false);
+            }
+        }
+
+        // Funciones para el modal y eliminación de respaldos
+        function toggleModeRespaldos() {
+            let cols = document.querySelectorAll('.col-check-r');
+            let btnConfirm = document.getElementById('btn-r');
+            let btnToggle = document.getElementById('toggle-r');
+
+            if (cols.length === 0) return;
+
+            let isHidden = cols[0].style.display === "none" || cols[0].style.display === "";
+
+            if (isHidden) {
+                cols.forEach(c => c.style.display = "table-cell");
+                btnConfirm.style.display = "inline-block";
+                btnToggle.textContent = "❌ Cancelar";
+                btnToggle.classList.remove("btn-secondary");
+                btnToggle.classList.add("btn-danger");
+            } else {
+                cols.forEach(c => c.style.display = "none");
+                btnConfirm.style.display = "none";
+                btnToggle.textContent = "🗑️ Modo Eliminar";
+                btnToggle.classList.remove("btn-danger");
+                btnToggle.classList.add("btn-secondary");
+                document.querySelectorAll('.col-check-r input').forEach(i => i.checked = false);
+            }
+        }
+
+        function mostrarModalConfirmacion() {
+            // Verificar que haya al menos un respaldo seleccionado
+            const seleccionados = document.querySelectorAll('input[name="respaldos_seleccionados"]:checked');
+            if (seleccionados.length === 0) {
+                alert('⚠️ Debe seleccionar al menos un respaldo para eliminar.');
+                return;
+            }
+            document.getElementById('modal-confirmar-eliminacion').style.display = 'flex';
+            document.getElementById('password_modal').value = '';
+            document.getElementById('password_modal').focus();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-confirmar-eliminacion').style.display = 'none';
+            document.getElementById('password_modal').value = '';
+        }
+
+        function confirmarEliminacion() {
+            const password = document.getElementById('password_modal').value;
+            if (!password) {
+                alert('⚠️ Debe ingresar su contraseña para confirmar.');
+                return;
+            }
+
+            // Transferir la contraseña al campo oculto del formulario
+            document.getElementById('password_confirmacion_hidden').value = password;
+
+            // Cerrar modal y enviar formulario
+            cerrarModal();
+            document.getElementById('form-eliminar-respaldos').submit();
+        }
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+                cerrarModalRechazo();
+            }
+        });
+
+        // Cerrar modal haciendo clic fuera del contenido
+        document.getElementById('modal-confirmar-eliminacion')?.addEventListener('click', function (e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Funciones para el modal de rechazo de solicitudes
+        function mostrarModalRechazo(solicitudId) {
+            document.getElementById('form-rechazo').action = '/admin/rechazar-solicitud/' + solicitudId;
+            document.getElementById('motivo_rechazo').value = '';
+            document.getElementById('modal-rechazo').style.display = 'flex';
+            document.getElementById('motivo_rechazo').focus();
+        }
+
+        function cerrarModalRechazo() {
+            document.getElementById('modal-rechazo').style.display = 'none';
+            document.getElementById('motivo_rechazo').value = '';
+        }
+
+        // Cerrar modal de rechazo haciendo clic fuera
+        document.getElementById('modal-rechazo')?.addEventListener('click', function (e) {
+            if (e.target === this) {
+                cerrarModalRechazo();
+            }
+        });
+    </script>
+</body>
+
+</html>

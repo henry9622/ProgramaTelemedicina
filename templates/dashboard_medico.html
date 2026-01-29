@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Médico - Clínica Digital</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #1a1a2e;
+            font-size: 1.5em;
+        }
+
+        .header h1 span {
+            color: #667eea;
+        }
+
+        .logout {
+            background: #ff4757;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout:hover {
+            background: #ff6b7a;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-header h2 {
+            color: #1a1a2e;
+            font-size: 1.3em;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .posta-badge {
+            background: #e8f4fd;
+            color: #0077b6;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .tens-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tens-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .btn-entrar {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-entrar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .tiempo {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .status-waiting {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #ff9f43;
+            font-weight: 500;
+        }
+
+        .status-waiting::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #ff9f43;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        /* ==========================================
+           ESTILOS RESPONSIVOS
+           ========================================== */
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .card {
+                padding: 20px 15px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+                font-size: 0.85em;
+            }
+
+            .btn-entrar {
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1em;
+            }
+
+            .posta-badge {
+                font-size: 0.75em;
+                padding: 4px 8px;
+            }
+
+            .tens-avatar {
+                width: 26px;
+                height: 26px;
+                font-size: 0.7em;
+            }
+        }
+
+        /* ==========================================
+           MENÚ DESPLEGABLE ESTADÍSTICAS
+           ========================================== */
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin-top: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .stats-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .stats-header:hover {
+            background: linear-gradient(135deg, #5a6fd6, #6a4190);
+        }
+
+        .stats-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-header .arrow {
+            transition: transform 0.3s;
+            font-size: 1.2em;
+        }
+
+        .stats-header.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .stats-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .stats-content.open {
+            max-height: 600px;
+        }
+
+        .stats-body {
+            padding: 20px 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f8f9ff, #e8f4fd);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .stat-box.pending {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        }
+
+        .stat-box.pending .number {
+            color: #ff9800;
+        }
+
+        .pending-alert {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .pending-alert h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .pending-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .pending-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn-reconectar {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reconectar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        }
+
+        .historial-mini {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .historial-mini table {
+            font-size: 0.9em;
+        }
+
+        .historial-mini td {
+            padding: 10px 8px;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+    </style>
+    <!-- CSRF Token para protección de formularios -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            document.querySelectorAll('form[method="post"]').forEach(function (form) {
+                if (!form.querySelector('input[name="csrf_token"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = csrfToken;
+                    form.insertBefore(input, form.firstChild);
+                }
+            });
+        });
+    </script>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍⚕️ <span>{{ saludo }}</span></h1>
+            <a href="/logout" class="logout">Cerrar Sesión</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>🏥 Sala de Espera Virtual</h2>
+                <span id="pacientes-count-badge" class="badge">{{ pacientes|length }} paciente(s) esperando</span>
+            </div>
+
+            <div id="sala-espera-container">
+                {% if pacientes|length == 0 %}
+                <div class="empty-state">
+                    <div class="icon">🩺</div>
+                    <p>No hay pacientes en espera en este momento</p>
+                    <p style="font-size: 0.9em; margin-top: 10px; color: #aaa;">
+                        Las consultas aparecerán aquí cuando un TENS las registre
+                    </p>
+                </div>
+                {% else %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código de Atención</th>
+                            <th>Centro de Salud</th>
+                            <th>TENS a cargo</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-pacientes-body">
+                        {% for p in pacientes %}
+                        <tr>
+                            <td>
+                                <strong style="font-size: 1.1em;">{{ p.cip }}</strong>
+                            </td>
+                            <td>
+                                <span class="posta-badge">📍 {{ p.nombre_posta }}</span>
+                            </td>
+                            <td>
+                                <div class="tens-info">
+                                    <div class="tens-avatar">{{ p.tens_nombre[0] }}</div>
+                                    <span>{{ p.tens_nombre }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-waiting">Esperando</span>
+                            </td>
+                            <td>
+                                <form action="/iniciar-consulta" method="post" style="display: inline;">
+                                    <input type="hidden" name="cip" value="{{ p.cip }}">
+                                    <input type="hidden" name="consulta_id" value="{{ p.id }}">
+                                    <button type="submit" class="btn-entrar">
+                                        📹 Iniciar Consulta
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+
+            <p class="refresh-info">
+                🔄 La Sala de Espera se actualiza automáticamente cada 10 segundos
+            </p>
+        </div>
+
+        <!-- Panel Desplegable de Estadísticas -->
+        <div class="stats-panel">
+            <div class="stats-header" onclick="toggleStats()" id="statsHeader">
+                <h3>
+                    📊 Resumen del Día
+                    <span style="opacity: 0.8; font-weight: normal; font-size: 0.9em;">
+                        ({{ consultas_finalizadas }} atención{% if consultas_finalizadas != 1 %}es{% endif %} hoy)
+                    </span>
+                </h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="stats-content" id="statsContent">
+                <div class="stats-body">
+
+                    <!-- Estadísticas Rápidas -->
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="number">{{ consultas_finalizadas }}</div>
+                            <div class="label">Finalizadas Hoy</div>
+                        </div>
+                        <div class="stat-box pending">
+                            <div class="number">{{ consultas_pendientes|length }}</div>
+                            <div class="label">Pendientes</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="number">{{ pacientes|length }}</div>
+                            <div class="label">En Espera</div>
+                        </div>
+                    </div>
+
+                    <!-- Alerta de Consultas Pendientes -->
+                    {% if consultas_pendientes|length > 0 %}
+                    <div class="pending-alert">
+                        <h4>⚠️ Consultas Pendientes por Reconexión</h4>
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                            Estas consultas quedaron activas (posible desconexión). Puede reconectarse o finalizarlas.
+                        </p>
+                        {% for cp in consultas_pendientes %}
+                        <div class="pending-item">
+                            <div>
+                                <strong>{{ cp.cip }}</strong>
+                                <span style="color: #666;">- {{ cp.nombre_posta }}</span>
+                            </div>
+                            <div>
+                                <form action="/iniciar-consulta" method="post" style="display: inline;">
+                                    <input type="hidden" name="cip" value="{{ cp.cip }}">
+                                    <input type="hidden" name="consulta_id" value="{{ cp.id }}">
+                                    <button type="submit" class="btn-reconectar">
+                                        🔄 Reconectar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Historial del Día -->
+                    {% if historial_hoy|length > 0 %}
+                    <h4 style="margin-bottom: 15px; color: #333;">📋 Atenciones del Día</h4>
+                    <div class="historial-mini">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>CIP</th>
+                                    <th>Posta</th>
+                                    <th>TENS</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in historial_hoy %}
+                                <tr>
+                                    <td><strong>{{ h.codigo_consulta }}</strong></td>
+                                    <td>{{ h.cip }}</td>
+                                    <td>{{ h.nombre_posta }}</td>
+                                    <td>{{ h.tens_nombre }}</td>
+                                    <td><span class="badge-success">✓ Finalizada</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #888; padding: 20px;">
+                        No hay atenciones finalizadas hoy
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables de estado
+        let refreshTimer = null;
+        let isPanelOpen = false;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Toggle del panel de estadísticas
+        function toggleStats() {
+            const header = document.getElementById('statsHeader');
+            const content = document.getElementById('statsContent');
+            header.classList.toggle('open');
+            content.classList.toggle('open');
+
+            // Guardar estado en localStorage
+            isPanelOpen = content.classList.contains('open');
+            localStorage.setItem('statsPanelOpen', isPanelOpen);
+
+            // Si se abre el panel, pausar auto-refresh de la página completa
+            if (isPanelOpen) {
+                clearTimeout(refreshTimer);
+                showRefreshPaused(true);
+            } else {
+                // Si se cierra, reiniciar auto-refresh de la página completa
+                startAutoRefresh();
+                showRefreshPaused(false);
+            }
+        }
+
+        // Mostrar/ocultar mensaje de pausa
+        function showRefreshPaused(paused) {
+            const refreshInfo = document.querySelector('.refresh-info');
+            if (refreshInfo) {
+                if (paused) {
+                    refreshInfo.innerHTML = '⏸️ Auto-recarga de página pausada. La Sala de Espera sigue actualizándose. <a href="#" onclick="closeAndRefresh()" style="color: #667eea;">Cerrar y actualizar todo</a>';
+                } else {
+                    refreshInfo.innerHTML = '🔄 La Sala de Espera se actualiza automáticamente cada 10 segundos';
+                }
+            }
+        }
+
+        // Cerrar panel y refrescar
+        function closeAndRefresh() {
+            localStorage.setItem('statsPanelOpen', 'false');
+            location.reload();
+            return false;
+        }
+
+        // Iniciar auto-refresh de la página completa (solo si el panel está cerrado)
+        function startAutoRefresh() {
+            clearTimeout(refreshTimer);
+            refreshTimer = setTimeout(() => {
+                if (!isPanelOpen) {
+                    location.reload();
+                }
+            }, 30000); // Recarga completa cada 30 seg si está en dashboard principal
+        }
+
+        // === ACTUALIZACIÓN AJAX DE LA SALA DE ESPERA ===
+        function actualizarSalaEspera() {
+            fetch('/api/pacientes-espera')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('pacientes-count-badge');
+                    const container = document.getElementById('sala-espera-container');
+
+                    // Actualizar contador
+                    if (badge) badge.innerText = `${data.total} paciente(s) esperando`;
+
+                    if (data.total === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">🩺</div>
+                                <p>No hay pacientes en espera en este momento</p>
+                                <p style="font-size: 0.9em; margin-top: 10px; color: #aaa;">
+                                    Las consultas aparecerán aquí cuando un TENS las registre
+                                </p>
+                            </div>`;
+                    } else {
+                        let html = `
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Código de Atención</th>
+                                        <th>Centro de Salud</th>
+                                        <th>TENS a cargo</th>
+                                        <th>Estado</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-pacientes-body">`;
+
+                        data.pacientes.forEach(p => {
+                            html += `
+                                <tr>
+                                    <td><strong style="font-size: 1.1em;">${p.cip}</strong></td>
+                                    <td><span class="posta-badge">📍 ${p.nombre_posta}</span></td>
+                                    <td>
+                                        <div class="tens-info">
+                                            <div class="tens-avatar">${p.tens_inicial}</div>
+                                            <span>${p.tens_nombre}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-waiting">Esperando</span></td>
+                                    <td>
+                                        <form action="/iniciar-consulta" method="post" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="${csrfToken}">
+                                            <input type="hidden" name="cip" value="${p.cip}">
+                                            <input type="hidden" name="consulta_id" value="${p.id}">
+                                            <button type="submit" class="btn-entrar">📹 Iniciar Consulta</button>
+                                        </form>
+                                    </td>
+                                </tr>`;
+                        });
+
+                        html += `</tbody></table>`;
+                        container.innerHTML = html;
+                    }
+                })
+                .catch(err => console.error('Error actualizando sala de espera:', err));
+        }
+
+        // Al cargar la página, restaurar estado del panel
+        document.addEventListener('DOMContentLoaded', function () {
+            const wasOpen = localStorage.getItem('statsPanelOpen') === 'true';
+
+            if (wasOpen) {
+                const header = document.getElementById('statsHeader');
+                const content = document.getElementById('statsContent');
+                header.classList.add('open');
+                content.classList.add('open');
+                isPanelOpen = true;
+                showRefreshPaused(true);
+            } else {
+                startAutoRefresh();
+            }
+
+            // Iniciar actualización periódica de la sala de espera (CADA 10 SEGUNDOS SIEMPRE)
+            setInterval(actualizarSalaEspera, 10000);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta en Vivo - {{ sala }}</title>
+    <script src="https://100.102.175.23:8443/external_api.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #top-bar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .info-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .role-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .role-medico {
+            background: #667eea;
+        }
+
+        .role-tens {
+            background: #28a745;
+        }
+
+        .patient-info {
+            font-size: 1.1em;
+        }
+
+        .patient-info strong {
+            color: #ffd93d;
+        }
+
+        #video-container {
+            flex: 1;
+            width: 100%;
+            background: #000;
+        }
+
+        .footer {
+            background: #1a1a2e;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid #333;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-finalizar {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .btn-finalizar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        .btn-salir {
+            background: #444;
+            color: white;
+        }
+
+        .btn-salir:hover {
+            background: #555;
+        }
+
+        /* Modal de espera para TENS */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            border: 1px solid #333;
+        }
+
+        .modal h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .modal p {
+            color: #aaa;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .btn-nuevo {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1em;
+        }
+
+        .btn-nuevo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.waiting {
+            background: #ff9f43;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+    </style>
+    <!-- CSRF Token para protección -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+
+<body>
+    <div id="top-bar">
+        <div class="info-left">
+            {% if es_medico %}
+            <span class="role-badge role-medico">👨‍⚕️ MÉDICO</span>
+            {% else %}
+            <span class="role-badge role-tens">🏥 TENS</span>
+            {% endif %}
+            <span class="patient-info">
+                Código de Atención: <strong>{{ sala }}</strong>
+            </span>
+        </div>
+        <div class="status-indicator">
+            <span class="status-dot connected"></span>
+            <span>Conectado</span>
+        </div>
+    </div>
+
+    <div id="video-container"></div>
+
+    <div class="footer">
+        {% if es_medico %}
+        <button onclick="finalizarConsulta()" class="btn btn-finalizar">
+            ✖ FINALIZAR CONSULTA
+        </button>
+        {% else %}
+        <span style="color: #888;">
+            ⏳ Esperando que el médico finalice la consulta...
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Modal para TENS cuando termina la consulta -->
+    <div class="overlay" id="overlay-finalizada">
+        <div class="modal">
+            <div class="icon">✅</div>
+            <h2>Consulta Finalizada</h2>
+            <p>El médico ha terminado la atención.<br>Puede proceder con el siguiente paciente.</p>
+            <a href="/dashboard_tens" class="btn btn-nuevo">
+                ➡️ Siguiente Paciente
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const domain = "100.102.175.23:8443";
+        const esMedico = {{ 'true' if es_medico else 'false' }};
+        const consultaId = "{{ consulta_id }}";
+
+        const options = {
+            roomName: "{{ sala }}",
+            width: "100%",
+            height: "100%",
+            parentNode: document.querySelector('#video-container'),
+            jwt: "{{ jitsi_token }}",
+
+            configOverwrite: {
+                prejoinPageEnabled: false,      // Sin página de pre-ingreso
+                disableInviteFunctions: true,   // Sin invitaciones
+                enableWelcomePage: false,       // Sin página de bienvenida
+                startWithAudioMuted: false,
+                startWithVideoMuted: false,
+                disableDeepLinking: true,
+                disableSelfView: false,
+                enableNoAudioDetection: true,
+                enableNoVideoDetection: true,
+
+                // === FORZAR BEST PERFORMANCE (Resolución 180p) ===
+                resolution: 180,
+                constraints: {
+                    video: {
+                        height: { ideal: 180, max: 180, min: 180 }
+                    }
+                },
+                // Calidad de video fija en la más baja (mejor rendimiento)
+                videoQuality: {
+                    preferredCodec: 'VP8',
+                    maxBitratesVideo: {
+                        low: 200000,
+                        standard: 200000,
+                        high: 200000
+                    }
+                },
+                // Deshabilitar el selector de calidad/rendimiento
+                disableAudioLevels: true,
+                enableLayerSuspension: true,
+
+                // === OCULTAR BOTÓN DE PERFORMANCE ===
+                disablePerformanceStats: true,
+                disableShowMoreStats: true,
+                hideConferenceTimer: false
+            },
+
+            interfaceConfigOverwrite: {
+                // SOLO MICRÓFONO Y CÁMARA
+                TOOLBAR_BUTTONS: [
+                    'microphone',
+                    'camera'
+                ],
+                // ELIMINAR TODA LA MARCA DE JITSI
+                SHOW_JITSI_WATERMARK: false,
+                SHOW_WATERMARK_FOR_GUESTS: false,
+                SHOW_BRAND_WATERMARK: false,
+                SHOW_CHROME_EXTENSION_BANNER: false,
+                DISPLAY_WELCOME_PAGE_CONTENT: false,
+                VIDEO_LAYOUT_FIT: 'both',
+                // Ocultar pestañas de ajustes internos
+                SETTINGS_SECTIONS: [],
+                // Asegurar que no aparezcan menús laterales
+                RECENT_LIST_ENABLED: false
+            },
+
+            userInfo: {
+                displayName: "{{ nombre_usuario }}"
+            }
+        };
+
+        const api = new JitsiMeetExternalAPI(domain, options);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        {% if es_medico %}
+        // === MÉDICO: Controla el cierre ===
+        let consultaFinalizada = false;  // Bandera para evitar doble envío
+
+        function finalizarConsulta() {
+            if (confirm('Esta seguro de finalizar esta consulta? El TENS sera notificado.')) {
+                consultaFinalizada = true;  // Marcar como finalizada para evitar auto-cierre
+
+                console.log('[DEBUG] Enviando petición para finalizar consulta:', consultaId);
+
+                // Enviar al servidor que la consulta terminó
+                fetch('/finalizar-consulta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: 'consulta_id=' + consultaId + '&csrf_token=' + csrfToken
+                })
+                    .then(response => {
+                        console.log('[DEBUG] Respuesta recibida, status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('[DEBUG] Datos recibidos:', data);
+                        if (data.success) {
+                            console.log('[DEBUG] Consulta finalizada exitosamente, cerrando Jitsi...');
+                            api.dispose(); // Cerrar Jitsi
+                            window.location.href = '/dashboard_medico';
+                        } else {
+                            console.error('[DEBUG] Error en respuesta:', data);
+                            alert('Error: ' + (data.error || data.message || 'Error desconocido'));
+                            consultaFinalizada = false;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('[DEBUG] Error en fetch:', err);
+                        alert('Error al finalizar la consulta: ' + err.message);
+                        consultaFinalizada = false;  // Permitir reintentar
+                    });
+            }
+        }
+
+        // Si el médico cierra la pestaña/ventana o navega hacia atrás, también finalizar
+
+        function finalizarConsultaAutomatica() {
+            if (consultaFinalizada) return;
+            consultaFinalizada = true;
+
+            // Usar FormData para sendBeacon
+            const formData = new FormData();
+            formData.append('consulta_id', consultaId);
+            formData.append('csrf_token', csrfToken);
+            formData.append('auto_close', 'true');
+
+            navigator.sendBeacon('/finalizar-consulta', formData);
+        }
+
+        // Detectar cuando el médico sale de la página (atrás, cerrar, recargar)
+        window.addEventListener('beforeunload', finalizarConsultaAutomatica);
+        window.addEventListener('pagehide', finalizarConsultaAutomatica);
+
+        // También detectar si pierde visibilidad por mucho tiempo (cambio de pestaña + cierre)
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                // Dar un pequeño margen antes de cerrar (por si solo cambió de pestaña)
+                setTimeout(function () {
+                    if (document.visibilityState === 'hidden' && !consultaFinalizada) {
+                        finalizarConsultaAutomatica();
+                    }
+                }, 30000); // 30 segundos de inactividad = cierre automático
+            }
+        });
+
+        {% else %}
+        // === TENS: Espera a que el médico finalice ===
+        function verificarEstado() {
+            console.log('[TENS DEBUG] Verificando estado de consulta:', consultaId);
+            fetch('/verificar-estado-consulta/' + consultaId)
+                .then(response => {
+                    console.log('[TENS DEBUG] Respuesta status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('[TENS DEBUG] Estado recibido:', data);
+                    if (data.estado === 'finalizada') {
+                        console.log('[TENS DEBUG] ¡Consulta finalizada! Mostrando modal...');
+                        // El médico finalizó, mostrar modal y cerrar Jitsi
+                        api.dispose();
+                        document.getElementById('overlay-finalizada').classList.add('active');
+                    }
+                })
+                .catch(err => console.error('[TENS DEBUG] Error verificando estado:', err));
+        }
+
+        // Verificar estado cada 3 segundos
+        setInterval(verificarEstado, 3000);
+        // También verificar inmediatamente
+        verificarEstado();
+        {% endif %}
+    </script>
+</body>
+
+</html>

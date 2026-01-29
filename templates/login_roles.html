@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Telemedicina - Selección de Rol</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            color: #003366;
+            margin-bottom: 30px;
+        }
+
+        .role-card {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .role-card:hover {
+            border-color: #004a99;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+
+        .role-card i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .medico {
+            border-left: 5px solid #007bff;
+        }
+
+        .tens {
+            border-left: 5px solid #28a745;
+        }
+
+        .admin {
+            border-left: 5px solid #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Centro Médico Digital</h1>
+        <p>Seleccione su rol para ingresar:</p>
+
+        <form action="/dashboard" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" name="rol" value="medico" class="role-card medico">
+                <strong>🩺 Médico Especialista</strong>
+                <span>Atención y diagnóstico remoto</span>
+            </button>
+
+            <button type="submit" name="rol" value="tens" class="role-card tens">
+                <strong>🏥 TENS (Terreno)</strong>
+                <span>Preparación de paciente y triaje</span>
+            </button>
+
+            <button type="submit" name="rol" value="admin" class="role-card admin">
+                <strong>⚙️ Administrador</strong>
+                <span>Gestión de plataforma y usuarios</span>
+            </button>
+        </form>
+    </div>
+</body>
+
+</html>

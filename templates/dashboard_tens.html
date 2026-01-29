@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel TENS - Clínica Digital</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f9f4;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+            margin: 0;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-top: 6px solid #28a745;
+        }
+
+        h2 {
+            color: #1a5928;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            /* Evita que el input se salga del cuadro */
+        }
+
+        .consent {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            border: 1px solid #e9ecef;
+            line-height: 1.4;
+        }
+
+        .radio-group {
+            margin-top: 10px;
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px;
+            margin-top: 25px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .logout {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilo para mensajes de error (Flash) */
+        .flash-messages {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+        }
+
+        .error-rut {
+            color: #dc3545;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        input.invalid {
+            border-color: #dc3545;
+        }
+    </style>
+    <!-- CSRF Token para protección de formularios -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            document.querySelectorAll('form[method="post"]').forEach(function (form) {
+                if (!form.querySelector('input[name="csrf_token"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = csrfToken;
+                    form.insertBefore(input, form.firstChild);
+                }
+            });
+
+            // Validación de RUT Chileno
+            const rutInput = document.getElementById('rut_paciente');
+            const errorMsg = document.getElementById('error-rut-msg');
+            const form = document.querySelector('form');
+
+            function validarRUT(rut) {
+                if (!rut || rut.length < 2) return false;
+                let tmp = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                let num = tmp.slice(0, -1);
+                let dv = tmp.slice(-1);
+
+                if (!/^[0-9]+$/.test(num)) return false;
+
+                let s = 0, m = 2;
+                for (let i = num.length - 1; i >= 0; i--) {
+                    s += parseInt(num.charAt(i)) * m;
+                    m = m < 7 ? m + 1 : 2;
+                }
+                let res = 11 - (s % 11);
+                let dvCalc = res === 11 ? "0" : res === 10 ? "K" : res.toString();
+                return dvCalc === dv;
+            }
+
+            if (rutInput) {
+                rutInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                    if (value.length > 1) {
+                        let formatted = value.slice(0, -1) + '-' + value.slice(-1);
+                        e.target.value = formatted;
+                    }
+
+                    if (value.length >= 8) {
+                        const esValido = validarRUT(value);
+                        if (esValido) {
+                            rutInput.classList.remove('invalid');
+                            errorMsg.style.display = 'none';
+                        } else {
+                            rutInput.classList.add('invalid');
+                            errorMsg.style.display = 'block';
+                        }
+                    } else {
+                        rutInput.classList.remove('invalid');
+                        errorMsg.style.display = 'none';
+                    }
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (rutInput) {
+                        let value = rutInput.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                        if (!validarRUT(value)) {
+                            e.preventDefault();
+                            rutInput.classList.add('invalid');
+                            errorMsg.style.display = 'block';
+                            rutInput.focus();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <div class="box">
+        <h2>{{ saludo }}</h2>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form action="/tens/crear-consulta" method="post">
+            <label>Lugar de Atención (Posta):</label>
+            <select name="lugar_id" required>
+                <option value="" disabled selected>Seleccione el centro de salud...</option>
+                {% for l in lugares %}
+                <option value="{{ l.id }}">{{ l.nombre_posta }}</option>
+                {% endfor %}
+            </select>
+
+            <label>RUT del Paciente (confidencial):</label>
+            <input type="text" name="rut_paciente" id="rut_paciente" placeholder="Ej: 12345678-9" required
+                autocomplete="off">
+            <div id="error-rut-msg" class="error-rut">El RUT ingresado no es válido</div>
+            <p style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                🔒 El RUT será validado y protegido. Se generará un código de atención anónimo.
+            </p>
+
+            <div class="consent">
+                <strong>Consentimiento Informado:</strong><br>
+                El paciente manifiesta voluntariamente su deseo de ser atendido mediante telemedicina y autoriza el
+                registro de su atención.
+
+                <div class="radio-group">
+                    <label style="font-weight: normal;">
+                        <input type="radio" name="consentimiento" value="aceptado" required> Acepto
+                    </label>
+                    <label style="font-weight: normal;">
+                        <input type="radio" name="consentimiento" value="rechazado"> Rechazo
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit">INICIAR ATENCIÓN</button>
+        </form>
+
+        <a href="/logout" class="logout">Cerrar Sesión</a>
+    </div>
+</body>
+
+</html>
